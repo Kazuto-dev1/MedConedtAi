@@ -11,6 +11,7 @@ import {
   Profissional,
 } from '../database/entities';
 import { NoShowModule } from '../no-show/no-show.module';
+import { NotificationsModule } from '../notifications/notification.module';
 import { SchedulingController } from './scheduling.controller';
 import { SchedulingService } from './scheduling.service';
 
@@ -24,6 +25,7 @@ import { SchedulingService } from './scheduling.service';
       Especialidade,
     ]),
     NoShowModule,
+    NotificationsModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

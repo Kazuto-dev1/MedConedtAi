@@ -11,8 +11,8 @@ import { Consulta, Paciente, Profissional } from '../database/entities';
 
 export type StatusSala = 'aguardando' | 'em_andamento' | 'encerrada';
 
-const JANELA_ANTES_MS = 15 * 60 * 1000; // entra 15 min antes
-const JANELA_DEPOIS_MS = 30 * 60 * 1000; // tolera 30 min apos o fim
+const JANELA_ANTES_MS = 15 * 60 * 1000;
+const JANELA_DEPOIS_MS = 30 * 60 * 1000;
 
 @Injectable()
 export class TeleconsultService {

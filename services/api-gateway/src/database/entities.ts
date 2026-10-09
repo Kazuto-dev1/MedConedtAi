@@ -6,9 +6,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-// Nomes de coluna em snake_case sao gerados pela SnakeNamingStrategy.
-// Entidades refletem db/sqlite/schema.sql (escopo Must).
-
 export type TipoUsuario = 'paciente' | 'profissional';
 export type NivelRisco = 'baixo' | 'medio' | 'alto';
 export type Modalidade = 'presencial' | 'teleconsulta';
@@ -251,8 +248,32 @@ export class Notificacao {
   @Column({ type: 'text' })
   tipo: string;
 
+  @Column({ type: 'text', nullable: true })
+  titulo: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  mensagem: string | null;
+
   @Column({ type: 'text', default: 'pendente' })
   status: 'enviado' | 'falha' | 'pendente';
+
+  @CreateDateColumn()
+  createdAt: Date;
+}
+
+@Entity('avaliacao')
+export class Avaliacao {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ unique: true })
+  consultaId: string;
+
+  @Column({ type: 'integer' })
+  nota: number;
+
+  @Column({ type: 'text', nullable: true })
+  comentario: string | null;
 
   @CreateDateColumn()
   createdAt: Date;

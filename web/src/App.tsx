@@ -1,14 +1,19 @@
 import type { ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import Agenda from './pages/Agenda';
 import Appointments from './pages/Appointments';
 import Dashboard from './pages/Dashboard';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import NoShowPanel from './pages/NoShowPanel';
+import Notifications from './pages/Notifications';
 import ProfessionalDetail from './pages/ProfessionalDetail';
 import Register from './pages/Register';
+import ResetPassword from './pages/ResetPassword';
 import Search from './pages/Search';
+import Security from './pages/Security';
 import Teleconsult from './pages/Teleconsult';
 import Triage from './pages/Triage';
 import { useAuthStore } from './store/auth';
@@ -27,6 +32,24 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/esqueci-senha" element={<ForgotPassword />} />
+          <Route path="/redefinir-senha" element={<ResetPassword />} />
+          <Route
+            path="/seguranca"
+            element={
+              <Protected>
+                <Security />
+              </Protected>
+            }
+          />
+          <Route
+            path="/notificacoes"
+            element={
+              <Protected>
+                <Notifications />
+              </Protected>
+            }
+          />
           <Route
             path="/buscar"
             element={
@@ -56,6 +79,14 @@ export default function App() {
             element={
               <Protected>
                 <NoShowPanel />
+              </Protected>
+            }
+          />
+          <Route
+            path="/agenda"
+            element={
+              <Protected>
+                <Agenda />
               </Protected>
             }
           />

@@ -5,11 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import {
   Consulta,
-  Notificacao,
   Paciente,
   PrevisaoNoShow,
   Profissional,
 } from '../database/entities';
+import { NotificationsModule } from '../notifications/notification.module';
 import { NoShowController } from './no-show.controller';
 import { NoShowService } from './no-show.service';
 
@@ -18,10 +18,10 @@ import { NoShowService } from './no-show.service';
     TypeOrmModule.forFeature([
       Consulta,
       PrevisaoNoShow,
-      Notificacao,
       Paciente,
       Profissional,
     ]),
+    NotificationsModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

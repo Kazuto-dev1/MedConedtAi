@@ -41,7 +41,6 @@ export default function Search() {
       .then(setEspecialidades)
       .catch(() => setErro('Falha ao carregar especialidades.'));
     buscar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function onSubmit(e: FormEvent) {
@@ -103,6 +102,11 @@ export default function Search() {
           <article key={p.id} className="card flex flex-col">
             <h3 className="text-base font-semibold text-slate-900">{p.nome}</h3>
             <p className="mt-1 text-sm text-teal-700">{p.especialidades.join(' · ')}</p>
+            {p.totalAvaliacoes > 0 && p.avaliacaoMedia != null && (
+              <p className="mt-1 text-sm text-amber-600">
+                ★ {p.avaliacaoMedia.toFixed(1)} ({p.totalAvaliacoes})
+              </p>
+            )}
             {p.bio && <p className="mt-2 flex-1 text-sm text-slate-500">{p.bio}</p>}
             <div className="mt-4 flex items-center justify-between">
               <span className="text-sm text-slate-500">

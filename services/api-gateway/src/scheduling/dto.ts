@@ -8,7 +8,7 @@ export class CreateAppointmentDto {
   modalidade: 'presencial' | 'teleconsulta';
 
   @IsString()
-  inicio: string; // 'YYYY-MM-DDTHH:MM:00'
+  inicio: string;
 
   @IsOptional()
   @IsString()
@@ -20,5 +20,5 @@ export class AvailabilityDto {
   profissionalId: string;
 
   @IsString()
-  data: string; // 'YYYY-MM-DD'
+  data: string;
 }

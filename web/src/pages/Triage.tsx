@@ -20,7 +20,7 @@ export default function Triage() {
     { autor: 'bot', texto: 'Importante: esta triagem nao substitui o diagnostico medico.' },
     { autor: 'bot', texto: 'Qual a sua idade?' },
   ]);
-  const [etapa, setEtapa] = useState(0); // 0 idade, 1 tempo, 2 historico, 3 sinais
+  const [etapa, setEtapa] = useState(0);
   const [texto, setTexto] = useState('');
   const [idade, setIdade] = useState(0);
   const [tempo, setTempo] = useState<number | undefined>(undefined);

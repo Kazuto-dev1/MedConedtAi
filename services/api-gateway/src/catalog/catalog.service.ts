@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Agenda, Especialidade, Profissional } from '../database/entities';
+import { ReviewService } from '../reviews/review.service';
 import { SearchProfessionalsDto } from './dto';
 
 interface ProfissionalResumo {
@@ -13,6 +14,8 @@ interface ProfissionalResumo {
   especialidadeIds: string[];
   blocos: number;
   precoMin: number | null;
+  avaliacaoMedia: number | null;
+  totalAvaliacoes: number;
 }
 
 @Injectable()
@@ -24,6 +27,7 @@ export class CatalogService {
     private readonly especialidades: Repository<Especialidade>,
     @InjectRepository(Agenda)
     private readonly agendas: Repository<Agenda>,
+    private readonly reviews: ReviewService,
   ) {}
 
   listarEspecialidades() {
@@ -34,10 +38,11 @@ export class CatalogService {
     const page = dto.page ?? 1;
     const perPage = dto.perPage ?? 15;
 
-    const [profissionais, agendas, especialidades] = await Promise.all([
+    const [profissionais, agendas, especialidades, reputacoes] = await Promise.all([
       this.profissionais.find({ where: { ativo: true } }),
       this.agendas.find(),
       this.especialidades.find(),
+      this.reviews.reputacoesPorProfissional(),
     ]);
     const nomePorId = new Map(especialidades.map((e) => [e.id, e.nome]));
 
@@ -49,6 +54,7 @@ export class CatalogService {
 
       const especialidadeIds = [...new Set(agendasProf.map((a) => a.especialidadeId))];
       const precos = agendasFiltro.map((a) => Number(a.preco));
+      const rep = reputacoes.get(p.id);
 
       return {
         id: p.id,
@@ -61,10 +67,11 @@ export class CatalogService {
           .filter((n): n is string => Boolean(n)),
         blocos: agendasFiltro.length,
         precoMin: precos.length ? Math.min(...precos) : null,
+        avaliacaoMedia: rep?.media ?? null,
+        totalAvaliacoes: rep?.total ?? 0,
       };
     });
 
-    // Precisa ter disponibilidade
     resultados = resultados.filter((r) => r.blocos > 0);
 
     if (dto.especialidadeId) {
@@ -79,7 +86,6 @@ export class CatalogService {
       );
     }
 
-    // Matching (RN040/RN041): mais disponibilidade, depois menor preco, depois nome.
     resultados.sort(
       (a, b) =>
         b.blocos - a.blocos ||
@@ -97,6 +103,8 @@ export class CatalogService {
       especialidades: r.especialidades,
       blocos: r.blocos,
       precoMin: r.precoMin,
+      avaliacaoMedia: r.avaliacaoMedia,
+      totalAvaliacoes: r.totalAvaliacoes,
     }));
 
     return { total, page, perPage, itens };
@@ -116,12 +124,15 @@ export class CatalogService {
       this.especialidades.find(),
     ]);
     const nomePorId = new Map(especialidades.map((e) => [e.id, e.nome]));
+    const avaliacoes = await this.reviews.listarPorProfissional(id);
 
     return {
       id: prof.id,
       nome: prof.nome,
       registroCrm: prof.registroCrm,
       bio: prof.bio,
+      reputacao: { media: avaliacoes.media, total: avaliacoes.total },
+      avaliacoes: avaliacoes.avaliacoes,
       agenda: agendas.map((a) => ({
         id: a.id,
         especialidade: nomePorId.get(a.especialidadeId) ?? null,

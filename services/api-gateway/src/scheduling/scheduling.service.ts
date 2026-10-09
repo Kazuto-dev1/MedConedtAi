@@ -16,6 +16,7 @@ import {
   Profissional,
 } from '../database/entities';
 import { NoShowService } from '../no-show/no-show.service';
+import { NotificationService } from '../notifications/notification.service';
 import { AvailabilityDto, CreateAppointmentDto } from './dto';
 
 const SLOT_MIN = 30;
@@ -36,6 +37,7 @@ export class SchedulingService {
     @InjectRepository(Especialidade)
     private readonly especialidades: Repository<Especialidade>,
     private readonly noShow: NoShowService,
+    private readonly notifications: NotificationService,
   ) {}
 
   async disponibilidade({ profissionalId, data }: AvailabilityDto) {
@@ -147,7 +149,7 @@ export class SchedulingService {
       profissionalId: dto.profissionalId,
       triagemId: dto.triagemId ?? null,
       modalidade: dto.modalidade,
-      status: 'confirmada', // pagamento fora de escopo nesta fase
+      status: 'confirmada',
       inicio,
       fim,
       linkTeleconsulta:
@@ -158,6 +160,10 @@ export class SchedulingService {
 
     const salva = await this.consultas.save(consulta);
     await this.noShow.avaliarConsulta(salva);
+    await this.notifications.confirmacaoConsulta(
+      paciente.usuarioId,
+      `Consulta com ${prof.nome} em ${inicio} (${dto.modalidade}).`,
+    );
     return this.serializar(salva, prof.nome);
   }
 

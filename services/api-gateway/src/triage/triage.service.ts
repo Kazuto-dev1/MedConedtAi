@@ -39,7 +39,6 @@ export class TriageService {
 
     const risco = this.risk.avaliar(dto);
 
-    // Rastreamento do cancer do colo do utero -> Ginecologia.
     const especialidade = await this.especialidades.findOne({
       where: { nome: 'Ginecologia' },
     });

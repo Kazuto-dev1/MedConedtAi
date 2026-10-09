@@ -38,10 +38,21 @@ export default function Navbar() {
               Consultas
             </Link>
             {tipo === 'profissional' && (
-              <Link to="/no-show" className="text-sm text-teal-600 hover:underline">
-                No-show
-              </Link>
+              <>
+                <Link to="/agenda" className="text-sm text-teal-600 hover:underline">
+                  Agenda
+                </Link>
+                <Link to="/no-show" className="text-sm text-teal-600 hover:underline">
+                  No-show
+                </Link>
+              </>
             )}
+            <Link to="/seguranca" className="text-sm text-teal-600 hover:underline">
+              Seguranca
+            </Link>
+            <Link to="/notificacoes" className="text-sm text-teal-600 hover:underline">
+              Notificacoes
+            </Link>
             <button
               type="button"
               className="text-sm text-teal-600 hover:underline"

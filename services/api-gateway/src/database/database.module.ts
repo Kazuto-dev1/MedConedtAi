@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import {
   Agenda,
+  Avaliacao,
   Consulta,
   Especialidade,
   Notificacao,
@@ -25,7 +26,6 @@ import {
           'SQLITE_PATH',
           '../../db/sqlite/medconecta.dev.sqlite',
         ),
-        // ATENCAO: synchronize=true e permitido APENAS em desenvolvimento.
         synchronize: true,
         entities: [
           Usuario,
@@ -38,6 +38,7 @@ import {
           Pagamento,
           PrevisaoNoShow,
           Notificacao,
+          Avaliacao,
         ],
         namingStrategy: new SnakeNamingStrategy(),
       }),

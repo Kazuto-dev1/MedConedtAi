@@ -8,11 +8,6 @@ export interface ResultadoRisco {
   probabilidade: number;
 }
 
-/**
- * Estrategia de risco provisoria (heuristica), alinhada ao stub do servico de IA
- * (ai/app/main.py). Sera substituida pelo modelo scikit-learn (regressao logistica
- * ou XGBoost) exposto pelo microsservico de IA. Alvo: alta sensibilidade (recall).
- */
 @Injectable()
 export class RiskService {
   avaliar(dto: TriageDto): ResultadoRisco {

@@ -13,6 +13,8 @@ export interface ProfissionalResumo {
   especialidades: string[];
   blocos: number;
   precoMin: number | null;
+  avaliacaoMedia: number | null;
+  totalAvaliacoes: number;
 }
 
 export interface BuscaResultado {
@@ -32,11 +34,20 @@ export interface AgendaItem {
   preco: number;
 }
 
+export interface AvaliacaoItem {
+  id: string;
+  nota: number;
+  comentario: string | null;
+  createdAt: string;
+}
+
 export interface ProfissionalDetalhe {
   id: string;
   nome: string;
   registroCrm: string;
   bio: string | null;
+  reputacao: { media: number | null; total: number };
+  avaliacoes: AvaliacaoItem[];
   agenda: AgendaItem[];
 }
 

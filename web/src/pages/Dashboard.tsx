@@ -54,7 +54,10 @@ export default function Dashboard() {
             </>
           ) : (
             <>
-              <Link to="/minhas-consultas" className="btn btn-primary">
+              <Link to="/agenda" className="btn btn-primary">
+                Minha agenda
+              </Link>
+              <Link to="/minhas-consultas" className="btn btn-ghost">
                 Minhas consultas
               </Link>
               <Link to="/no-show" className="btn btn-ghost">

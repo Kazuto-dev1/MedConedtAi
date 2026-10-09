@@ -18,7 +18,6 @@ class RiskFeatures(BaseModel):
 
 @app.post("/risk/predict")
 def prever_risco(f: RiskFeatures):
-    # Stub provisorio (sem modelo treinado). Sera substituido pelo scikit-learn.
     score = 0.2
     if f.sinais_alerta:
         score += 0.4
@@ -38,7 +37,6 @@ class NoShowFeatures(BaseModel):
 
 @app.post("/no-show/predict")
 def prever_no_show(f: NoShowFeatures):
-    # Stub provisorio. Limiar de alto risco: >= 0.50 (DEC-003).
     prob = 0.2 + 0.05 * f.historico_faltas - 0.01 * f.antecedencia_dias
     prob = max(0.0, min(prob, 0.99))
     risco = "alto" if prob >= 0.5 else "medio" if prob >= 0.25 else "baixo"

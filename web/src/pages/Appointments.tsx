@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { cancelarConsulta, listarConsultas, type Consulta } from '../api/scheduling';
+import { avaliarConsulta } from '../api/reviews';
 
 const COR_STATUS: Record<string, string> = {
   confirmada: 'bg-green-100 text-green-700',
@@ -10,8 +12,7 @@ const COR_STATUS: Record<string, string> = {
 };
 
 function formatar(iso: string): string {
-  const d = new Date(iso);
-  return d.toLocaleString('pt-BR', {
+  return new Date(iso).toLocaleString('pt-BR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -20,10 +21,21 @@ function formatar(iso: string): string {
   });
 }
 
+function elegivelAvaliar(c: Consulta): boolean {
+  if (c.status === 'cancelada') return false;
+  return c.status === 'concluida' || new Date(c.inicio).getTime() < Date.now();
+}
+
 export default function Appointments() {
   const [consultas, setConsultas] = useState<Consulta[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const [avaliadas, setAvaliadas] = useState<Set<string>>(new Set());
+  const [avaliandoId, setAvaliandoId] = useState<string | null>(null);
+  const [nota, setNota] = useState(5);
+  const [comentario, setComentario] = useState('');
 
   async function carregar() {
     try {
@@ -48,6 +60,33 @@ export default function Appointments() {
     }
   }
 
+  function abrirAvaliacao(id: string) {
+    setAvaliandoId(id);
+    setNota(5);
+    setComentario('');
+    setMsg(null);
+    setErro(null);
+  }
+
+  async function enviarAvaliacao(e: React.FormEvent) {
+    e.preventDefault();
+    if (!avaliandoId) return;
+    try {
+      await avaliarConsulta(avaliandoId, nota, comentario || undefined);
+      setAvaliadas((s) => new Set(s).add(avaliandoId));
+      setMsg('Avaliacao registrada. Obrigado!');
+      setAvaliandoId(null);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
+        setAvaliadas((s) => new Set(s).add(avaliandoId));
+        setErro('Esta consulta ja foi avaliada.');
+        setAvaliandoId(null);
+      } else {
+        setErro('Nao foi possivel enviar a avaliacao.');
+      }
+    }
+  }
+
   return (
     <div>
       <section className="pb-6">
@@ -55,7 +94,8 @@ export default function Appointments() {
       </section>
 
       {loading && <p className="text-slate-500">Carregando...</p>}
-      {erro && <p className="text-red-600">{erro}</p>}
+      {erro && <p className="mb-3 text-red-600">{erro}</p>}
+      {msg && <p className="mb-3 text-sm text-green-700">{msg}</p>}
 
       {!loading && consultas.length === 0 && !erro && (
         <p className="text-slate-500">
@@ -65,39 +105,88 @@ export default function Appointments() {
 
       <div className="flex flex-col gap-3">
         {consultas.map((c) => (
-          <article key={c.id} className="card flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="font-medium text-slate-900">{c.contraparte}</p>
-              <p className="text-sm text-slate-500">
-                {formatar(c.inicio)} &middot; {c.modalidade}
-              </p>
-              {c.modalidade === 'teleconsulta' && c.status !== 'cancelada' && (
-                <Link
-                  to={`/teleconsulta/${c.id}`}
-                  className="mt-1 inline-block text-xs text-teal-600 hover:underline"
+          <article key={c.id} className="card">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-medium text-slate-900">{c.contraparte}</p>
+                <p className="text-sm text-slate-500">
+                  {formatar(c.inicio)} &middot; {c.modalidade}
+                </p>
+                {c.modalidade === 'teleconsulta' && c.status !== 'cancelada' && (
+                  <Link
+                    to={`/teleconsulta/${c.id}`}
+                    className="mt-1 inline-block text-xs text-teal-600 hover:underline"
+                  >
+                    Entrar na teleconsulta
+                  </Link>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                    COR_STATUS[c.status] ?? 'bg-slate-100 text-slate-600'
+                  }`}
                 >
-                  Entrar na teleconsulta
-                </Link>
-              )}
+                  {c.status}
+                </span>
+                {c.status !== 'cancelada' && c.status !== 'concluida' && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() => cancelar(c.id)}
+                  >
+                    Cancelar
+                  </button>
+                )}
+                {elegivelAvaliar(c) && !avaliadas.has(c.id) && avaliandoId !== c.id && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() => abrirAvaliacao(c.id)}
+                  >
+                    Avaliar
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                  COR_STATUS[c.status] ?? 'bg-slate-100 text-slate-600'
-                }`}
-              >
-                {c.status}
-              </span>
-              {c.status !== 'cancelada' && c.status !== 'concluida' && (
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => cancelar(c.id)}
-                >
-                  Cancelar
-                </button>
-              )}
-            </div>
+
+            {avaliandoId === c.id && (
+              <form onSubmit={enviarAvaliacao} className="mt-4 border-t border-slate-200 pt-4">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`text-2xl ${n <= nota ? 'text-amber-500' : 'text-slate-300'}`}
+                      onClick={() => setNota(n)}
+                      aria-label={`${n} estrela(s)`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                  <span className="ml-2 text-sm text-slate-500">{nota}/5</span>
+                </div>
+                <textarea
+                  className="input mt-3"
+                  rows={2}
+                  placeholder="Comentario (opcional)"
+                  value={comentario}
+                  onChange={(e) => setComentario(e.target.value)}
+                />
+                <div className="mt-3 flex gap-2">
+                  <button type="submit" className="btn btn-primary">
+                    Enviar avaliacao
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() => setAvaliandoId(null)}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            )}
           </article>
         ))}
       </div>

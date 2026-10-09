@@ -24,7 +24,7 @@ import {
 } from './dto';
 
 const MFA_EMISSOR = 'MedConecta AI';
-const RESET_TTL_MS = 60 * 60 * 1000; // 1 hora
+const RESET_TTL_MS = 60 * 60 * 1000;
 
 const sha256 = (v: string) => createHash('sha256').update(v).digest('hex');
 
@@ -204,7 +204,6 @@ export class AuthService {
 
   async esqueciSenha(dto: ForgotPasswordDto) {
     const usuario = await this.usuarios.findOne({ where: { email: dto.email } });
-    // Resposta generica evita revelar se o e-mail existe.
     const resposta: { message: string; token?: string } = {
       message: 'Se o e-mail existir, enviaremos instrucoes de recuperacao.',
     };
@@ -217,7 +216,6 @@ export class AuthService {
     usuario.resetTokenExpira = new Date(Date.now() + RESET_TTL_MS);
     await this.usuarios.save(usuario);
 
-    // Em producao o token iria por e-mail; em dev retornamos para teste.
     if (process.env.NODE_ENV !== 'production') {
       resposta.token = token;
     }

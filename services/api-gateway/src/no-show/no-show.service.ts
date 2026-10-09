@@ -8,11 +8,11 @@ import { Repository } from 'typeorm';
 import { UsuarioPayload } from '../auth/jwt.guard';
 import {
   Consulta,
-  Notificacao,
   Paciente,
   PrevisaoNoShow,
   Profissional,
 } from '../database/entities';
+import { NotificationService } from '../notifications/notification.service';
 
 export type NivelNoShow = 'baixo' | 'medio' | 'alto';
 
@@ -24,11 +24,6 @@ export interface ResultadoNoShow {
 
 const DIAS_MS = 86_400_000;
 
-/**
- * Previsao de no-show provisoria (heuristica), alinha ao stub do servico de IA
- * (ai/app/main.py). Limiar de alto risco: >= 0.50 (DEC-003). Sera substituida pelo
- * modelo scikit-learn.
- */
 @Injectable()
 export class NoShowService {
   constructor(
@@ -36,12 +31,11 @@ export class NoShowService {
     private readonly consultas: Repository<Consulta>,
     @InjectRepository(PrevisaoNoShow)
     private readonly previsoes: Repository<PrevisaoNoShow>,
-    @InjectRepository(Notificacao)
-    private readonly notificacoes: Repository<Notificacao>,
     @InjectRepository(Paciente)
     private readonly pacientes: Repository<Paciente>,
     @InjectRepository(Profissional)
     private readonly profissionais: Repository<Profissional>,
+    private readonly notifications: NotificationService,
   ) {}
 
   private calcular(antecedenciaDias: number, historicoFaltas: number): {
@@ -65,7 +59,6 @@ export class NoShowService {
     return this.consultas.count({ where: { pacienteId, status: 'cancelada' } });
   }
 
-  /** Calcula, persiste a previsao e aciona lembrete reforcado se risco alto. */
   async avaliarConsulta(consulta: Consulta): Promise<ResultadoNoShow> {
     const historico = await this.historicoFaltas(consulta.pacienteId);
     const { probabilidade, risco } = this.calcular(
@@ -98,13 +91,9 @@ export class NoShowService {
         where: { id: consulta.pacienteId },
       });
       if (paciente) {
-        await this.notificacoes.save(
-          this.notificacoes.create({
-            usuarioId: paciente.usuarioId,
-            canal: 'push',
-            tipo: 'lembrete_reforcado',
-            status: 'pendente',
-          }),
+        await this.notifications.lembreteReforcado(
+          paciente.usuarioId,
+          `Confirme sua consulta em ${consulta.inicio}.`,
         );
       }
     }

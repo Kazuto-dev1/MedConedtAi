@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Agenda, Especialidade, Profissional } from '../database/entities';
+import { ReviewModule } from '../reviews/review.module';
 import { CatalogController } from './catalog.controller';
 import { CatalogService } from './catalog.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Profissional, Especialidade, Agenda])],
+  imports: [
+    TypeOrmModule.forFeature([Profissional, Especialidade, Agenda]),
+    ReviewModule,
+  ],
   controllers: [CatalogController],
   providers: [CatalogService],
 })

@@ -64,7 +64,6 @@ export default function ProfessionalDetail() {
 
   useEffect(() => {
     carregarDisponibilidade();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, data]);
 
   async function agendar(inicio: string) {
@@ -96,6 +95,11 @@ export default function ProfessionalDetail() {
       <section className="card mt-4">
         <h1 className="text-2xl font-bold text-slate-900">{prof.nome}</h1>
         <p className="mt-1 text-sm text-slate-500">Registro: {prof.registroCrm}</p>
+        <p className="mt-1 text-sm text-amber-600">
+          {prof.reputacao.total > 0 && prof.reputacao.media != null
+            ? `★ ${prof.reputacao.media.toFixed(1)} (${prof.reputacao.total} avaliacao(oes))`
+            : 'Sem avaliacoes ainda'}
+        </p>
         {prof.bio && <p className="mt-3 text-slate-600">{prof.bio}</p>}
       </section>
 
@@ -206,6 +210,30 @@ export default function ProfessionalDetail() {
               </tbody>
             </table>
           </div>
+        )}
+      </section>
+
+      <section className="card mt-4">
+        <h2 className="mb-3 text-lg font-semibold text-slate-900">Avaliacoes</h2>
+        {prof.avaliacoes.length === 0 ? (
+          <p className="text-slate-500">Ainda sem avaliacoes.</p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {prof.avaliacoes.map((a) => (
+              <li key={a.id} className="py-3">
+                <p className="text-amber-600">
+                  {'★'.repeat(a.nota)}
+                  {'☆'.repeat(5 - a.nota)}
+                </p>
+                {a.comentario && (
+                  <p className="mt-1 text-sm text-slate-600">{a.comentario}</p>
+                )}
+                <p className="mt-1 text-xs text-slate-400">
+                  {new Date(a.createdAt).toLocaleDateString('pt-BR')}
+                </p>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
     </div>
