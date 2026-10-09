@@ -1,0 +1,22 @@
+# Desenvolvimento local do MedConecta AI
+# Observacao: o api-gateway roda com SQLite provisorio e nao exige Docker.
+# Este compose sobe Redis (filas/cache) e o servico de IA (Python) quando necessario.
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: medconecta-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  ai:
+    build: ../ai
+    container_name: medconecta-ai
+    environment:
+      PORT: "8000"
+    ports:
+      - "8000:8000"
+
+volumes:
+  redisdata:

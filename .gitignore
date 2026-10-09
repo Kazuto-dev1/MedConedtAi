@@ -1,0 +1,29 @@
+# Dependencias
+node_modules/
+*/node_modules/
+
+# Build
+dist/
+*/dist/
+build/
+
+# Ambiente
+.env
+*/.env
+!.env.example
+
+# Banco provisorio (dados locais)
+db/sqlite/*.sqlite
+db/sqlite/*.sqlite-journal
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Logs / SO
+*.log
+.DS_Store
+Thumbs.db
+
+/docs
