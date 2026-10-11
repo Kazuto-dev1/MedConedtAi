@@ -31,6 +31,8 @@ export default function Appointments() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [cancelandoId, setCancelandoId] = useState<string | null>(null);
+  const [processandoId, setProcessandoId] = useState<string | null>(null);
 
   const [avaliadas, setAvaliadas] = useState<Set<string>>(new Set());
   const [avaliandoId, setAvaliandoId] = useState<string | null>(null);
@@ -52,11 +54,18 @@ export default function Appointments() {
   }, []);
 
   async function cancelar(id: string) {
+    setProcessandoId(id);
+    setErro(null);
+    setMsg(null);
     try {
       await cancelarConsulta(id);
       await carregar();
+      setMsg('Consulta cancelada. Você pode agendar outro horário quando quiser.');
     } catch {
-      setErro('Nao foi possivel cancelar a consulta.');
+      setErro('Não foi possível cancelar a consulta. Atualize a página e tente novamente.');
+    } finally {
+      setProcessandoId(null);
+      setCancelandoId(null);
     }
   }
 
@@ -93,9 +102,9 @@ export default function Appointments() {
         <h1 className="text-2xl font-bold text-slate-900">Minhas consultas</h1>
       </section>
 
-      {loading && <p className="text-slate-500">Carregando...</p>}
-      {erro && <p className="mb-3 text-red-600">{erro}</p>}
-      {msg && <p className="mb-3 text-sm text-green-700">{msg}</p>}
+      {loading && <p role="status" className="text-slate-500">Carregando suas consultas...</p>}
+      {erro && <p role="alert" className="mb-3 text-red-700">{erro}</p>}
+      {msg && <p role="status" className="mb-3 text-sm text-green-700">{msg}</p>}
 
       {!loading && consultas.length === 0 && !erro && (
         <p className="text-slate-500">
@@ -129,11 +138,11 @@ export default function Appointments() {
                 >
                   {c.status}
                 </span>
-                {c.status !== 'cancelada' && c.status !== 'concluida' && (
+                {c.status !== 'cancelada' && c.status !== 'concluida' && cancelandoId !== c.id && (
                   <button
                     type="button"
                     className="btn btn-ghost"
-                    onClick={() => cancelar(c.id)}
+                    onClick={() => setCancelandoId(c.id)}
                   >
                     Cancelar
                   </button>
@@ -186,6 +195,17 @@ export default function Appointments() {
                   </button>
                 </div>
               </form>
+            )}
+            {cancelandoId === c.id && (
+              <div className="confirmation-panel" role="alert">
+                <p><strong>Cancelar esta consulta?</strong> Esta ação não pode ser desfeita.</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button type="button" className="btn btn-danger" onClick={() => cancelar(c.id)} disabled={processandoId === c.id}>
+                    {processandoId === c.id ? 'Cancelando...' : 'Sim, cancelar consulta'}
+                  </button>
+                  <button type="button" className="btn btn-ghost" onClick={() => setCancelandoId(null)} disabled={processandoId === c.id}>Manter consulta</button>
+                </div>
+              </div>
             )}
           </article>
         ))}

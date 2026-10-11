@@ -35,6 +35,7 @@ export default function Teleconsult() {
   const [loading, setLoading] = useState(true);
   const [encerrando, setEncerrando] = useState(false);
   const [encerrada, setEncerrada] = useState(false);
+  const [confirmarEncerramento, setConfirmarEncerramento] = useState(false);
 
   useEffect(() => {
     if (!appointmentId) return;
@@ -50,6 +51,7 @@ export default function Teleconsult() {
     try {
       await encerrarSessao(appointmentId);
       setEncerrada(true);
+      setConfirmarEncerramento(false);
     } catch {
       setErro('Nao foi possivel encerrar a consulta.');
     } finally {
@@ -57,8 +59,8 @@ export default function Teleconsult() {
     }
   }
 
-  if (loading) return <p className="text-slate-500">Carregando sala...</p>;
-  if (erro) return <p className="text-red-600">{erro}</p>;
+  if (loading) return <p role="status" className="text-slate-500">Carregando sala...</p>;
+  if (erro) return <p role="alert" className="text-red-700">{erro}</p>;
   if (!sessao) return null;
 
   const encerradaFinal = encerrada || sessao.status === 'encerrada' || sessao.consultaStatus === 'concluida';
@@ -120,13 +122,22 @@ export default function Teleconsult() {
             <button
               type="button"
               className="btn btn-ghost"
-              onClick={encerrar}
+              onClick={() => setConfirmarEncerramento(true)}
               disabled={encerrando}
             >
               {encerrando ? 'Encerrando...' : 'Encerrar consulta'}
             </button>
           )}
         </div>
+        {confirmarEncerramento && (
+          <div className="confirmation-panel" role="alert">
+            <p><strong>Encerrar a consulta agora?</strong> Os participantes perderão o acesso à sala.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" className="btn btn-danger" onClick={encerrar} disabled={encerrando}>{encerrando ? 'Encerrando...' : 'Encerrar consulta'}</button>
+              <button type="button" className="btn btn-ghost" onClick={() => setConfirmarEncerramento(false)} disabled={encerrando}>Continuar consulta</button>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Agenda from './pages/Agenda';
 import Appointments from './pages/Appointments';
 import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
+import Help from './pages/Help';
 import Login from './pages/Login';
 import NoShowPanel from './pages/NoShowPanel';
 import Notifications from './pages/Notifications';
@@ -25,11 +26,12 @@ function Protected({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
+    <div className="min-h-screen bg-white text-slate-900">
       <Navbar />
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main id="conteudo" tabIndex={-1} className="app-main mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/ajuda" element={<Help />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/esqueci-senha" element={<ForgotPassword />} />
@@ -117,8 +119,10 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <footer className="border-t border-slate-200 py-5 text-center text-sm text-slate-500">
-        MedConecta AI &middot; prototipo &middot; a triagem nao substitui diagnostico medico
+      <footer className="mt-10 border-t border-slate-200 bg-slate-50 py-7 text-center text-sm text-slate-500">
+        <p className="font-semibold text-slate-700">MedConecta AI</p>
+        <p className="mt-1">Cuidado conectado, com tecnologia e acolhimento.</p>
+        <p className="mt-1 text-xs">A triagem não substitui diagnóstico médico. <Link to="/ajuda" className="underline hover:text-[#006b5e]">Central de ajuda</Link></p>
       </footer>
     </div>
   );

@@ -26,12 +26,16 @@ export default function Agenda() {
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [removendoId, setRemovendoId] = useState<string | null>(null);
 
   async function carregar() {
     try {
       setBlocos(await listarMinhaAgenda());
     } catch {
       setErro('Nao foi possivel carregar a agenda (acesso do profissional).');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -93,8 +97,11 @@ export default function Agenda() {
       await removerBloco(id);
       if (editandoId === id) cancelarEdicao();
       await carregar();
+      setMsg('Bloco removido da agenda.');
     } catch {
       setErro('Nao foi possivel remover o bloco.');
+    } finally {
+      setRemovendoId(null);
     }
   }
 
@@ -107,8 +114,8 @@ export default function Agenda() {
         </p>
       </section>
 
-      {msg && <p className="mb-4 text-sm text-green-700">{msg}</p>}
-      {erro && <p className="mb-4 text-sm text-red-600">{erro}</p>}
+      {msg && <p role="status" className="mb-4 text-sm text-green-700">{msg}</p>}
+      {erro && <p role="alert" className="mb-4 text-sm text-red-700">{erro}</p>}
 
       <form onSubmit={onSubmit} className="card mb-6 flex flex-wrap items-end gap-3">
         <label className="field min-w-[180px] flex-1">
@@ -192,7 +199,8 @@ export default function Agenda() {
         )}
       </form>
 
-      <section className="card overflow-x-auto">
+      <section className="card overflow-x-auto" aria-busy={loading}>
+        {loading ? <p role="status" className="text-slate-500">Carregando agenda...</p> : <>
         {blocos.length === 0 ? (
           <p className="text-slate-500">Nenhum bloco cadastrado.</p>
         ) : (
@@ -225,19 +233,24 @@ export default function Agenda() {
                     >
                       Editar
                     </button>
-                    <button
+                    {removendoId === b.id ? (
+                      <span className="inline-flex items-center gap-2 text-xs text-slate-600">
+                        Remover? <button type="button" className="font-semibold text-red-700 hover:underline" onClick={() => remover(b.id)}>Confirmar</button>
+                        <button type="button" className="font-semibold text-[#006b5e] hover:underline" onClick={() => setRemovendoId(null)}>Não</button>
+                      </span>
+                    ) : <button
                       type="button"
                       className="text-xs text-red-600 hover:underline"
-                      onClick={() => remover(b.id)}
+                      onClick={() => setRemovendoId(b.id)}
                     >
                       Remover
-                    </button>
+                    </button>}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
+        )}</>}
       </section>
     </div>
   );

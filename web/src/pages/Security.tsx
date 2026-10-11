@@ -14,12 +14,15 @@ export default function Security() {
   const [codigo, setCodigo] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   async function carregar() {
     try {
       setMe(await obterMe());
     } catch {
       setErro('Nao foi possivel carregar os dados da conta.');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -64,9 +67,8 @@ export default function Security() {
     }
   }
 
-  if (!me) {
-    return <p className="text-slate-500">Carregando...</p>;
-  }
+  if (loading) return <p role="status" className="text-slate-500">Carregando configurações de segurança...</p>;
+  if (!me) return <div role="alert" className="card max-w-xl text-red-700"><p>{erro ?? 'Não foi possível carregar os dados da conta.'}</p><button type="button" className="mt-3 font-semibold text-[#006b5e] hover:underline" onClick={() => { setLoading(true); carregar(); }}>Tentar novamente</button></div>;
 
   return (
     <div className="mx-auto max-w-xl">
@@ -77,8 +79,8 @@ export default function Security() {
         </p>
       </section>
 
-      {msg && <p className="mb-4 text-sm text-green-700">{msg}</p>}
-      {erro && <p className="mb-4 text-sm text-red-600">{erro}</p>}
+      {msg && <p role="status" className="mb-4 text-sm text-green-700">{msg}</p>}
+      {erro && <p role="alert" className="mb-4 text-sm text-red-700">{erro}</p>}
 
       <section className="card">
         <h2 className="text-lg font-semibold text-slate-900">Verificacao em duas etapas (MFA)</h2>

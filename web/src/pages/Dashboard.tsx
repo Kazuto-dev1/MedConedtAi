@@ -16,12 +16,24 @@ function formatar(iso: string): string {
 export default function Dashboard() {
   const tipo = useAuthStore((s) => s.tipo);
   const [consultas, setConsultas] = useState<Consulta[]>([]);
+  const [loading, setLoading] = useState(tipo === 'paciente');
+  const [erro, setErro] = useState<string | null>(null);
+
+  async function carregarConsultas() {
+    if (tipo !== 'paciente') return;
+    setLoading(true);
+    setErro(null);
+    try {
+      setConsultas(await listarConsultas());
+    } catch {
+      setErro('Não foi possível carregar suas próximas consultas.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    if (tipo !== 'paciente') return;
-    listarConsultas()
-      .then(setConsultas)
-      .catch(() => undefined);
+    carregarConsultas();
   }, [tipo]);
 
   const proximas = consultas
@@ -76,7 +88,9 @@ export default function Dashboard() {
               Ver todas
             </Link>
           </div>
-          {proximas.length === 0 ? (
+          {loading ? <p role="status" className="mt-2 text-sm text-slate-500">Carregando consultas...</p> : erro ? (
+            <div role="alert" className="mt-2 text-sm text-red-700"><p>{erro}</p><button type="button" className="mt-1 font-semibold text-[#006b5e] hover:underline" onClick={carregarConsultas}>Tentar novamente</button></div>
+          ) : proximas.length === 0 ? (
             <p className="mt-2 text-sm text-slate-500">
               Nenhuma consulta marcada. Va em <strong>Buscar</strong> para agendar.
             </p>

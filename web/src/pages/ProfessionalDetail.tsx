@@ -40,6 +40,7 @@ export default function ProfessionalDetail() {
   const [agendando, setAgendando] = useState(false);
   const [agendada, setAgendada] = useState<Consulta | null>(null);
   const [erroAgenda, setErroAgenda] = useState<string | null>(null);
+  const [slotSelecionado, setSlotSelecionado] = useState<Disponibilidade['slots'][number] | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -74,6 +75,7 @@ export default function ProfessionalDetail() {
     try {
       const nova = await criarConsulta({ profissionalId: id, modalidade, inicio });
       setAgendada(nova);
+      setSlotSelecionado(null);
       await carregarDisponibilidade();
     } catch {
       setErroAgenda('Nao foi possivel agendar. O horario pode ter sido ocupado.');
@@ -82,8 +84,8 @@ export default function ProfessionalDetail() {
     }
   }
 
-  if (loading) return <p className="text-slate-500">Carregando...</p>;
-  if (erro) return <p className="text-red-600">{erro}</p>;
+  if (loading) return <p role="status" className="text-slate-500">Carregando perfil...</p>;
+  if (erro) return <p role="alert" className="text-red-700">{erro}</p>;
   if (!prof) return null;
 
   return (
@@ -150,8 +152,8 @@ export default function ProfessionalDetail() {
         </div>
 
         <div className="mt-4">
-          {buscando && <p className="text-sm text-slate-500">Buscando horarios...</p>}
-          {erroAgenda && <p className="text-sm text-red-600">{erroAgenda}</p>}
+          {buscando && <p role="status" className="text-sm text-slate-500">Buscando horários...</p>}
+          {erroAgenda && <div role="alert" className="text-sm text-red-700"><p>{erroAgenda}</p><button type="button" className="mt-1 font-semibold text-[#006b5e] hover:underline" onClick={carregarDisponibilidade}>Tentar novamente</button></div>}
 
           {disp && !buscando && disp.slots.length === 0 && (
             <p className="text-sm text-slate-500">Sem horarios disponiveis nesta data.</p>
@@ -165,12 +167,21 @@ export default function ProfessionalDetail() {
                   type="button"
                   className="btn btn-ghost"
                   disabled={agendando}
-                  onClick={() => agendar(s.inicio)}
+                  onClick={() => setSlotSelecionado(s)}
                   title={`R$ ${s.preco.toFixed(2)}`}
                 >
                   {s.hora}
                 </button>
               ))}
+            </div>
+          )}
+          {slotSelecionado && (
+            <div className="confirmation-panel" role="status">
+              <p><strong>Confirmar agendamento?</strong> {formatar(slotSelecionado.inicio)} · {modalidade} · R$ {slotSelecionado.preco.toFixed(2)}.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button type="button" className="btn btn-primary" onClick={() => agendar(slotSelecionado.inicio)} disabled={agendando}>{agendando ? 'Agendando...' : 'Confirmar consulta'}</button>
+                <button type="button" className="btn btn-ghost" onClick={() => setSlotSelecionado(null)} disabled={agendando}>Escolher outro horário</button>
+              </div>
             </div>
           )}
         </div>

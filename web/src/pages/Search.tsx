@@ -86,18 +86,20 @@ export default function Search() {
           />
         </label>
 
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-primary" disabled={loading}>
           {loading ? 'Buscando...' : 'Buscar'}
         </button>
       </form>
 
-      {erro && <p className="mb-4 text-sm text-red-600">{erro}</p>}
+      {loading && <p role="status" className="mb-4 text-sm text-slate-500">Atualizando resultados...</p>}
+      {erro && <div role="alert" className="mb-4 text-sm text-red-700"><p>{erro}</p><button type="button" className="mt-2 font-semibold text-[#006b5e] hover:underline" onClick={buscar}>Tentar novamente</button></div>}
 
       {!loading && !erro && (
         <p className="mb-3 text-sm text-slate-500">{total} profissional(is) encontrado(s).</p>
       )}
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {!loading && !erro && itens.length === 0 && <p className="card text-slate-600">Nenhum profissional encontrado com esses filtros. Tente ampliar sua busca.</p>}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-live="polite">
         {itens.map((p) => (
           <article key={p.id} className="card flex flex-col">
             <h3 className="text-base font-semibold text-slate-900">{p.nome}</h3>
