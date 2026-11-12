@@ -15,17 +15,19 @@ Este projeto é uma plataforma web interativa desenvolvida para aproximar pacien
 
 ### Tela Inicial
 
-![Tela inicial do MedConecta AI](docs/screenshots/inicial-desktop.png)
+<img width="1597" height="1022" alt="image" src="https://github.com/user-attachments/assets/72979229-e88d-4075-98ce-078510d005ad" />
+
 
 ### Tela de Login
+<img width="1701" height="906" alt="login-desktop" src="https://github.com/user-attachments/assets/efcd973f-9731-4b6c-b40b-51268e6cf191" />
 
-![Tela de login do MedConecta AI](docs/screenshots/login-desktop.png)
 
 ### Triagem Conversacional
 
 A paciente responde a perguntas sobre idade, tempo desde o último exame preventivo, alteração em exame anterior e sinal de alerta. Ao final, o sistema mostra a prioridade, a especialidade sugerida e o nível de risco, com o botão **Ver profissionais**. O exemplo usa dados de teste.
 
-![Triagem com resultado de risco e especialidade sugerida](docs/screenshots/triagem-desktop.png)
+<img width="1593" height="992" alt="image" src="https://github.com/user-attachments/assets/94c6cdf6-0254-457e-911e-0ffbb90ed418" />
+
 
 ## 🚀 Funcionalidades
 
